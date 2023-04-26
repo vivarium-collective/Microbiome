@@ -83,4 +83,4 @@ def main(model_path, simulation_time):
     sim.update(simulation_time)
     data = sim.emitter.get_data()
     output = pf(data)
-    return output, processes, topology
+    return data,output, processes, topology
