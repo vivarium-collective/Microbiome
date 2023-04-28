@@ -4,6 +4,7 @@ import numpy as np
 from cobra.io import read_sbml_model
 from cobra.util import create_stoichiometric_matrix
 
+
 class DynamicFBA(Process):
     defaults = {}
 
@@ -17,13 +18,6 @@ class DynamicFBA(Process):
         for reaction in self.model.reactions:
             bounds[reaction.id] = (reaction.lower_bound, reaction.upper_bound)
         return bounds
-
-    def reaction_bound_change(self, percentage):  #This is an aging process which in each timestep we reduce 10% of flux bounds
-        for reaction in self.model.reactions:
-            old_bounds = self.bounds[reaction.id]
-            new_bounds = (old_bounds[0] * (1 - percentage), old_bounds[1] * (1 - percentage))
-            reaction.lower_bound, reaction.upper_bound = new_bounds
-            self.bounds[reaction.id] = new_bounds
 
     def ports_schema(self):
         return {
@@ -56,7 +50,6 @@ class DynamicFBA(Process):
             reaction = self.model.reactions.get_by_id(reaction_id)
             reaction.lower_bound, reaction.upper_bound = lower_bound, upper_bound
 
-        self.reaction_bound_change(0.1)  # Apply 10% reaction_bound_change
         solution = self.model.optimize()
         objective_value = solution.objective_value
         fluxes = solution.fluxes.to_dict()
@@ -67,16 +60,51 @@ class DynamicFBA(Process):
         }
 
 
+class ReactionBoundUpdater(Process):
+    defaults = {
+        "reaction_bound_percentage_change": 0.1
+    }
+
+    def __init__(self, parameters=None):
+        super().__init__(parameters=parameters)
+        self.percentage_change = self.parameters["reaction_bound_percentage_change"]
+
+    def ports_schema(self):
+        return {
+            "reaction_bounds": {
+                '_default': {},
+                '_emit': True,
+                "_updater": "set"
+            }
+        }
+
+    def next_update(self, timestep, state):
+        reaction_bounds = state["reaction_bounds"]
+
+        updated_reaction_bounds = {}
+        for reaction_id, (lower_bound, upper_bound) in reaction_bounds.items():
+            new_bounds = (lower_bound * (1 - self.percentage_change), upper_bound * (1 - self.percentage_change))
+            updated_reaction_bounds[reaction_id] = new_bounds
+
+        return {
+            "reaction_bounds": updated_reaction_bounds
+        }
+
+
 def main(model_path, simulation_time):
     parameters = {"model_file": model_path}
     dynamic_fba = DynamicFBA(parameters)
-    processes = {'DynamicFBA': dynamic_fba}
+    reaction_bound_updater = ReactionBoundUpdater()
+    processes = {'DynamicFBA': dynamic_fba, 'ReactionBoundUpdater': reaction_bound_updater}
     topology = {
         'DynamicFBA': {
             'fluxes': ("fluxes_values",),
             'reactions': ("reactions_list",),
             'objective_flux': ("objective_flux_value",),
-            'reaction_bounds': ("reaction_bounds",),  # Connect the reaction_bounds output to the input
+            'reaction_bounds': ("reaction_bounds",),
+        },
+        'ReactionBoundUpdater': {
+            'reaction_bounds': ("reaction_bounds",),
         }
     }
     sim = Engine(processes=processes, topology=topology)

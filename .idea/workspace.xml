@@ -8,6 +8,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Models/dFBA_processes.py" beforeDir="false" afterPath="$PROJECT_DIR$/Models/dFBA_processes.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Notebooks/dFBA.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Notebooks/dFBA.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plots/escher_plot__dFBA.html" beforeDir="false" afterPath="$PROJECT_DIR$/Plots/escher_plot__dFBA.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
