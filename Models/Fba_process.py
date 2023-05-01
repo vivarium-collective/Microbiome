@@ -1,6 +1,7 @@
 from vivarium.core.process import Process
 from vivarium.core.engine import Engine, pf
 import numpy as np
+
 from cobra.io import read_sbml_model
 from cobra.util import create_stoichiometric_matrix
 
