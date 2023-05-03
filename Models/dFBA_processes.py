@@ -3,7 +3,8 @@ from vivarium.core.engine import Engine, pf
 import numpy as np
 from cobra.io import read_sbml_model
 from cobra.util import create_stoichiometric_matrix
-
+# Add the Time_proportion variable, We consider each time-step a minute
+Time_proportion = (1/60)
 class ReactionBounds(Process):
     defaults = {}
 
@@ -90,12 +91,46 @@ class DynamicFBA(Process):
             "fluxes": fluxes,
             "objective_flux": objective_value
         }
+class Biomass_Calculator(Process):
+    defaults = {}
+
+    def __init__(self, parameters=None, initial_objective_flux=0.5):
+        super().__init__(parameters=parameters)
+        self.current_biomass = initial_objective_flux
+
+    def compute_biomass(self, objective_flux, time_proportion, timestep):
+        self.current_biomass += objective_flux * time_proportion * self.current_biomass
+        return self.current_biomass
+
+    def ports_schema(self):
+        return {
+            "objective_flux": {
+                '_default': 0.00000001,
+                "_updater": "set"
+            },
+            "current_biomass": {
+                '_default': 0.00000001,
+                '_emit': True,
+                "_updater": "set"
+            }
+        }
+
+    def next_update(self, timestep, state):
+        objective_flux = state["objective_flux"]
+        current_biomass = self.compute_biomass(objective_flux, Time_proportion, timestep)
+        return {
+            "current_biomass": current_biomass
+        }
+
+
+
 
 def main(model_path, simulation_time):
     parameters = {"model_file": model_path}
     reaction_bounds = ReactionBounds(parameters)
     dynamic_fba = DynamicFBA(parameters, reaction_bounds)
-    processes = {'ReactionBounds': reaction_bounds, 'DynamicFBA': dynamic_fba}
+    biomass_calculator = Biomass_Calculator(parameters)  # Add this line
+    processes = {'ReactionBounds': reaction_bounds, 'DynamicFBA': dynamic_fba, 'BiomassCalculator': biomass_calculator}  # Add the BiomassCalculator to processes
     topology = {
         'ReactionBounds': {
             'reaction_bounds': ('reaction_bounds',),
@@ -104,7 +139,11 @@ def main(model_path, simulation_time):
             'fluxes': ('fluxes_values',),
             'reactions': ('reactions_list',),
             'objective_flux': ('objective_flux_value',),
-            'reaction_bounds': ('reaction_bounds',)  # Add this line
+            'reaction_bounds': ('reaction_bounds',)
+        },
+        'BiomassCalculator': {  # For the BiomassCalculator topology
+            'objective_flux': ('objective_flux_value',),
+            'current_biomass': ('current_biomass_value',)
         }
     }
     sim = Engine(processes=processes, topology=topology)
