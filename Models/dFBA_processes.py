@@ -94,7 +94,7 @@ class DynamicFBA(Process):
 class Biomass_Calculator(Process):
     defaults = {}
 
-    def __init__(self, parameters=None, initial_objective_flux=0.5):
+    def __init__(self, parameters=None, initial_objective_flux=None):
         super().__init__(parameters=parameters)
         self.current_biomass = initial_objective_flux
 
@@ -105,11 +105,11 @@ class Biomass_Calculator(Process):
     def ports_schema(self):
         return {
             "objective_flux": {
-                '_default': 0.00000001,
+                '_default': 0.0,
                 "_updater": "set"
             },
             "current_biomass": {
-                '_default': 0.00000001,
+                '_default': 0.0,
                 '_emit': True,
                 "_updater": "set"
             }
@@ -124,13 +124,19 @@ class Biomass_Calculator(Process):
 
 
 
-
 def main(model_path, simulation_time):
     parameters = {"model_file": model_path}
     reaction_bounds = ReactionBounds(parameters)
     dynamic_fba = DynamicFBA(parameters, reaction_bounds)
-    biomass_calculator = Biomass_Calculator(parameters)  # Add this line
-    processes = {'ReactionBounds': reaction_bounds, 'DynamicFBA': dynamic_fba, 'BiomassCalculator': biomass_calculator}  # Add the BiomassCalculator to processes
+
+    # We use these lines to pass the initial_objective_flux to Biomass_Calculator
+    initial_state = {"reaction_bounds": reaction_bounds.bounds}
+    initial_objective_flux_update = dynamic_fba.next_update(1, initial_state)
+    initial_objective_flux = initial_objective_flux_update["objective_flux"]
+
+    biomass_calculator = Biomass_Calculator(parameters, initial_objective_flux=initial_objective_flux)
+    processes = {'ReactionBounds': reaction_bounds, 'DynamicFBA': dynamic_fba, 'BiomassCalculator': biomass_calculator}
+
     topology = {
         'ReactionBounds': {
             'reaction_bounds': ('reaction_bounds',),
@@ -141,7 +147,7 @@ def main(model_path, simulation_time):
             'objective_flux': ('objective_flux_value',),
             'reaction_bounds': ('reaction_bounds',)
         },
-        'BiomassCalculator': {  # For the BiomassCalculator topology
+        'BiomassCalculator': {
             'objective_flux': ('objective_flux_value',),
             'current_biomass': ('current_biomass_value',)
         }
@@ -151,3 +157,5 @@ def main(model_path, simulation_time):
     data = sim.emitter.get_data()
     output = pf(data)
     return data, output, processes, topology
+
+

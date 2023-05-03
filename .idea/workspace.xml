@@ -8,13 +8,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Models/dFBA_processes.py" beforeDir="false" afterPath="$PROJECT_DIR$/Models/dFBA_processes.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Notebooks/dFBA.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Notebooks/dFBA.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plots/escher_plot__dFBA_time_step_1.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plots/escher_plot__dFBA_time_step_10.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plots/escher_plot__dFBA_time_step_2.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plots/escher_plot__dFBA_time_step_20.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plots/escher_plot__dFBA_time_step_3.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plots/escher_plot__dFBA_time_step_5.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plots/escher_plot__dFBA_time_step_59.html" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,8 +47,8 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Models/dFBA_processes.py</url>
-          <line>152</line>
-          <option name="timeStamp" value="2" />
+          <line>107</line>
+          <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
