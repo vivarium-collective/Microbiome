@@ -122,6 +122,40 @@ class Biomass_Calculator(Process):
             "current_biomass": current_biomass
         }
 
+class Env_Calculator(Process):
+    defaults = {}
+
+    def __init__(self, parameters=None):
+        super().__init__(parameters=parameters)
+        self.current_env_consumption = 0
+
+    def ports_schema(self):
+        return {
+            "current_biomass": {
+                "_default": 0.0,
+                "_updater": "set",
+            },
+            "fluxes_values": {
+                "_default": {},
+                "_updater": "set",
+            },
+            "current_env_consumption": {
+                "_default": 0.0,
+                "_emit": True,
+                "_updater": "set",
+            },
+        }
+
+    def next_update(self, timestep, state):
+        current_biomass = state["current_biomass"]
+        fluxes_values = state["fluxes_values"]
+        if "EX_glc__D_e" in fluxes_values:
+            self.current_env_consumption += (
+                    current_biomass * fluxes_values["EX_glc__D_e"] * Time_proportion
+            )
+
+        return {"current_env_consumption": self.current_env_consumption}
+
 
 
 def main(model_path, simulation_time):
@@ -135,7 +169,13 @@ def main(model_path, simulation_time):
     initial_objective_flux = initial_objective_flux_update["objective_flux"]
 
     biomass_calculator = Biomass_Calculator(parameters, initial_objective_flux=initial_objective_flux)
-    processes = {'ReactionBounds': reaction_bounds, 'DynamicFBA': dynamic_fba, 'BiomassCalculator': biomass_calculator}
+    env_calculator = Env_Calculator(parameters)
+    processes = {
+        'ReactionBounds': reaction_bounds,
+        'DynamicFBA': dynamic_fba,
+        'BiomassCalculator': biomass_calculator,
+        'EnvCalculator': env_calculator
+    }
 
     topology = {
         'ReactionBounds': {
@@ -150,6 +190,11 @@ def main(model_path, simulation_time):
         'BiomassCalculator': {
             'objective_flux': ('objective_flux_value',),
             'current_biomass': ('current_biomass_value',)
+        },
+        'EnvCalculator': {
+            'current_biomass': ('current_biomass_value',),
+            'fluxes_values': ('fluxes_values',),
+            'current_env_consumption': ('current_env_consumption_value',)
         }
     }
     sim = Engine(processes=processes, topology=topology)
