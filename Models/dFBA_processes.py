@@ -128,6 +128,10 @@ class Env_Calculator(Process):
     def __init__(self, parameters=None):
         super().__init__(parameters=parameters)
         self.current_env_consumption = 0
+        self.concentration = 11.11  # Initial concentration in mmol/L
+        self.V = 1  # Volume in liter
+        self.Vmax = 10.01  # mmol gDW^(-1) h^(-1)
+        self.Km = 0.01111  # initial glucose concentration/1000, For now we consider it a very low number 0.01111 mmol gDW^(-1)
 
     def ports_schema(self):
         return {
@@ -144,6 +148,16 @@ class Env_Calculator(Process):
                 "_emit": True,
                 "_updater": "set",
             },
+            "concentration": {  # Add concentration to the schema
+                "_default": self.concentration,
+                "_emit": True,
+                "_updater": "set",
+            },
+            "Current_V0": {  # Add Current_V0 to the schema
+                "_default": 10.0,
+                "_emit": True,
+                "_updater": "set",
+            }
         }
 
     def next_update(self, timestep, state):
@@ -151,10 +165,19 @@ class Env_Calculator(Process):
         fluxes_values = state["fluxes_values"]
         if "EX_glc__D_e" in fluxes_values:
             self.current_env_consumption += (
-                    current_biomass * fluxes_values["EX_glc__D_e"] * Time_proportion
+                current_biomass * fluxes_values["EX_glc__D_e"] * Time_proportion
             )
+        # Calculate concentration
+        delta_C = self.current_env_consumption / self.V
+        self.concentration -= abs(delta_C)
+        # Calculate Current_V0
+        Current_V0 = self.Vmax * self.concentration / (self.Km + self.concentration)
 
-        return {"current_env_consumption": self.current_env_consumption}
+        return {
+            "current_env_consumption": self.current_env_consumption,
+            "concentration": self.concentration,  # Emit the updated concentration
+            "Current_V0": Current_V0  # Emit the calculated Current_V0
+        }
 
 
 
@@ -194,7 +217,9 @@ def main(model_path, simulation_time):
         'EnvCalculator': {
             'current_biomass': ('current_biomass_value',),
             'fluxes_values': ('fluxes_values',),
-            'current_env_consumption': ('current_env_consumption_value',)
+            'current_env_consumption': ('current_env_consumption_value',),
+            'concentration': ('concentration',),
+            'Current_V0': ('Current_V0',)
         }
     }
     sim = Engine(processes=processes, topology=topology)
