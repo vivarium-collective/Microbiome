@@ -46,7 +46,7 @@ class ReactionBounds(Process):
                 new_lower_bound = old_bounds[0] * (1 - (percentage * timestep))
                 new_upper_bound = old_bounds[1] * (1 - (percentage * timestep))
                 if reaction_id == "EX_glc__D_e":
-                    new_lower_bound = max(new_lower_bound, Current_V0)
+                    new_lower_bound = max(new_lower_bound, new_lower_bound) # Current_V0)
                 new_bounds = (new_lower_bound, new_upper_bound)
                 updated_bounds[reaction_id] = new_bounds
 
