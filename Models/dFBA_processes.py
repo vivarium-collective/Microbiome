@@ -25,6 +25,10 @@ class ReactionBounds(Process):
                 '_default': self.bounds,
                 '_emit': True,
                 "_updater": "set"
+            },
+            "Current_V0": {  # Add Current_V0 to the schema
+                "_default": 10.0,
+                "_updater": "set",
             }
         }
 
@@ -32,17 +36,22 @@ class ReactionBounds(Process):
         # Apply 10% reaction_bound_change, it can be any function the user wants
         percentage = 0.1
         updated_bounds = {}
+        Current_V0 = state['Current_V0']
 
         if timestep == 0:
             updated_bounds = self.bounds
         else:
             current_bounds = state["reaction_bounds"]  # Use the current state's bounds
             for reaction_id, old_bounds in current_bounds.items():
-                new_bounds = (
-                old_bounds[0] * (1 - (percentage * timestep)), old_bounds[1] * (1 - (percentage * timestep)))
+                new_lower_bound = old_bounds[0] * (1 - (percentage * timestep))
+                new_upper_bound = old_bounds[1] * (1 - (percentage * timestep))
+                if reaction_id == "EX_glc__D_e":
+                    new_lower_bound = max(new_lower_bound, Current_V0)
+                new_bounds = (new_lower_bound, new_upper_bound)
                 updated_bounds[reaction_id] = new_bounds
 
         return {"reaction_bounds": updated_bounds}
+
 
 
 class DynamicFBA(Process):
@@ -203,6 +212,7 @@ def main(model_path, simulation_time):
     topology = {
         'ReactionBounds': {
             'reaction_bounds': ('reaction_bounds',),
+            'Current_V0': ('Current_V0',)
         },
         'DynamicFBA': {
             'fluxes': ('fluxes_values',),
