@@ -3,7 +3,12 @@
 dFBA Process
 Amin Boroomand, UConn Health, 2023
 ==============
-TODO: Add documentation
+This code performs Dynamic Flux Balance Analysis (DFBA) by reading
+a model from an SBML file and computing the flux at each time step.
+It incorporates an aging process that reduces the flux bounds by 10
+percent at each time step. Furthermore, it considers environmental input
+limitations by calculating the glucose usage at each time step, subsequently
+subtracting it from the environmental glucose concentration.
 """
 
 from vivarium.core.process import Process
@@ -16,7 +21,9 @@ TIME_PROPORTION = (1 / 60)  # we set each time-step as an hour and the Time_prop
 
 class ReactionBounds(Process):
     """
-    TODO: Add documentation
+    This class initializes and updates the reaction bounds for the model.
+
+    ReactionBounds ingests a COBRA model, creating an initial dictionary of reaction bounds. For each update, it adjusts the reaction bounds considering a predefined aging percentage and resource limitation. The resource limitation is evaluated based on the available resources and their consumption at each timestep. This class also receives v0 from the EnvCalculator class, which represents the flux calculated using the current glucose concentration by the Michaelis-Menten equation.
     """
 
     defaults = {
@@ -66,6 +73,12 @@ class ReactionBounds(Process):
 
         return {"reaction_bounds": updated_bounds}
 class DynamicFBA(Process):
+    """
+    This class conducts the flux balance analysis for the model.
+
+    DynamicFBA accepts an SBML model and the reaction bounds. It calculates flux balance analysis and optimizes it at each update, producing the fluxes and objective value as output.
+    """
+
     defaults = {'reaction_bounds': None}
 
     def __init__(self, parameters=None):
@@ -115,8 +128,11 @@ class DynamicFBA(Process):
 
 class BiomassCalculator(Process):
     """
-    TODO: Add documentation
-    """
+This class computes the current biomass based on the objective flux.
+
+BiomassCalculator takes in the initial objective flux and estimates the current biomass at each update. The calculation is based on the objective flux, the time proportion, and the current biomass.
+"""
+
     defaults = {'initial_objective_flux': None}
 
     def __init__(self, parameters=None):
@@ -149,6 +165,12 @@ class BiomassCalculator(Process):
 
 
 class EnvCalculator(Process):
+    """
+    This class estimates the environmental consumption (Glucose in this case) and concentration.
+
+    EnvCalculator calculates the environmental consumption using the current biomass and flux values. It also updates the concentration and current v0 values using the Michaelis-Menten equation.
+    """
+
     defaults = {
         'init_concentration': 11.1,
         'volume': 1,
@@ -205,6 +227,12 @@ class EnvCalculator(Process):
 
 
 def main(model_path, simulation_time):
+    """
+    This function runs the simulation for a specified duration.
+
+    It initializes the ReactionBounds, DynamicFBA, BiomassCalculator, and EnvCalculator processes, establishes the topology between these processes, and executes the simulation for the specified timeframe.
+    """
+
     parameters = {"model_file": model_path}
     reaction_bounds = ReactionBounds(parameters)
     parameters['reaction_bounds'] = reaction_bounds
