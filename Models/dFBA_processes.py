@@ -3,9 +3,9 @@
 dFBA Process
 Amin Boroomand, UConn Health, 2023
 ==============
-To do: Documentation
-
+TODO: Add documentation
 """
+
 from vivarium.core.process import Process
 from vivarium.core.engine import Engine, pf
 from cobra.io import read_sbml_model
@@ -16,12 +16,11 @@ TIME_PROPORTION = (1 / 60)  # we set each time-step as an hour and the Time_prop
 
 class ReactionBounds(Process):
     """
-    To Do: Documentation
-
+    TODO: Add documentation
     """
+
     defaults = {
         'model_file': None,
-
     }
 
     def __init__(self, parameters=None):
@@ -42,7 +41,7 @@ class ReactionBounds(Process):
                 '_emit': True,
                 '_updater': 'set'
             },
-            "Current_V0": {  # Add Current_V0 to the schema #TODO : Lower case
+            "current_v0": {
                 '_default': 10.0
             }
         }
@@ -51,23 +50,21 @@ class ReactionBounds(Process):
         # Apply 10% reaction_bound_change, it can be any function the user wants
         percentage = 0.001
         updated_bounds = {}
-        Current_V0 = state['Current_V0']  #TODO:take care of it
+        current_v0 = state['current_v0']
 
         if timestep == 0:
             updated_bounds = self.bounds
         else:
-            current_bounds = state["reaction_bounds"]  # Use the current state's bounds
+            current_bounds = state["reaction_bounds"]
             for reaction_id, old_bounds in current_bounds.items():
                 new_lower_bound = old_bounds[0] * (1 - (percentage * timestep))
                 new_upper_bound = old_bounds[1] * (1 - (percentage * timestep))
                 if reaction_id == "EX_glc__D_e":
-                    new_lower_bound = max(new_lower_bound, Current_V0)
+                    new_lower_bound = max(new_lower_bound, current_v0)
                 new_bounds = (new_lower_bound, new_upper_bound)
                 updated_bounds[reaction_id] = new_bounds
 
         return {"reaction_bounds": updated_bounds}
-
-
 class DynamicFBA(Process):
     defaults = {'reaction_bounds': None}
 
@@ -101,7 +98,6 @@ class DynamicFBA(Process):
         }
 
     def next_update(self, timestep, state):
-        # Use provided reaction_bounds for optimizing the model
         reaction_bounds = state["reaction_bounds"]
         for reaction_id, (lower_bound, upper_bound) in reaction_bounds.items():
             reaction = self.model.reactions.get_by_id(reaction_id)
@@ -116,15 +112,16 @@ class DynamicFBA(Process):
         }
 
 
+
 class BiomassCalculator(Process):
     """
-    TO do : documentaiton
+    TODO: Add documentation
     """
     defaults = {'initial_objective_flux': None}
 
     def __init__(self, parameters=None):
         super().__init__(parameters=parameters)
-        self.current_biomass = self.parameters['initial_objective_flux'] #TODO make it to parametetrs
+        self.current_biomass = self.parameters['initial_objective_flux']
 
     def compute_biomass(self, objective_flux, time_proportion):
         self.current_biomass += objective_flux * time_proportion * self.current_biomass
@@ -139,7 +136,7 @@ class BiomassCalculator(Process):
             "current_biomass": {
                 '_default': 0.0,
                 '_emit': True,
-                "_updater": "set"  #TODO single quite
+                "_updater": "set"
             }
         }
 
@@ -151,12 +148,12 @@ class BiomassCalculator(Process):
         }
 
 
-class Env_Calculator(Process):   #TODO underscore, """
-    defaults = {'init_concentration': 11.1,   # Initial concentration in mmol/L
-                'volume': 1,                  # Volume in liter
-                'Vmax': 10.01,           # mmol gDW^(-1) h^(-1)
-                'Km': 0.002111            # initial glucose concentration/1000, For now we consider it a very low number 0.01111 mmol gDW^(-1)
-
+class EnvCalculator(Process):
+    defaults = {
+        'init_concentration': 11.1,
+        'volume': 1,
+        'vmax': 10.01,
+        'km': 0.002111
     }
 
     def __init__(self, parameters=None):
@@ -180,7 +177,7 @@ class Env_Calculator(Process):   #TODO underscore, """
                 "_emit": True,
                 "_updater": "accumulate",
             },
-            "Current_V0": {  # Add Current_V0 to the schema  #TODO capitol and single qui
+            "current_v0": {
                 "_default": 10.0,
                 "_emit": True,
                 "_updater": "set",
@@ -196,16 +193,14 @@ class Env_Calculator(Process):   #TODO underscore, """
             env_consumption = (
                     current_biomass * fluxes_values["EX_glc__D_e"] * TIME_PROPORTION
             )
-        # Calculate concentration
-        delta_C = env_consumption / self.parameters['volume']
-        concentration -= abs(delta_C)
-        # Calculate Current_V0
-        Current_V0 = self.parameters['Vmax'] * concentration / (self.parameters['Km'] + concentration)  #TODO lower case
+        delta_c = env_consumption / self.parameters['volume']
+        concentration -= abs(delta_c)
+        current_v0 = self.parameters['vmax'] * concentration / (self.parameters['km'] + concentration)
 
         return {
             "current_env_consumption": env_consumption,
-            "concentration": -abs(delta_C),  # Emit the updated concentration
-            "Current_V0": Current_V0  # Emit the calculated Current_V0
+            "concentration": -abs(delta_c),
+            "current_v0": current_v0
         }
 
 
@@ -215,13 +210,12 @@ def main(model_path, simulation_time):
     parameters['reaction_bounds'] = reaction_bounds
     dynamic_fba = DynamicFBA(parameters)
 
-    # We use these lines to pass the initial_objective_flux to Biomass_Calculator
     initial_state = {"reaction_bounds": reaction_bounds.bounds}
     initial_objective_flux_update = dynamic_fba.next_update(1, initial_state)
     initial_objective_flux = initial_objective_flux_update["objective_flux"]
     parameters["initial_objective_flux"] = initial_objective_flux
     biomass_calculator = BiomassCalculator(parameters)
-    env_calculator = Env_Calculator(parameters)
+    env_calculator = EnvCalculator(parameters)
     processes = {
         'ReactionBounds': reaction_bounds,
         'DynamicFBA': dynamic_fba,
@@ -232,7 +226,7 @@ def main(model_path, simulation_time):
     topology = {
         'ReactionBounds': {
             'reaction_bounds': ('reaction_bounds',),
-            'Current_V0': ('Current_V0',)
+            'current_v0': ('current_v0',)
         },
         'DynamicFBA': {
             'fluxes': ('fluxes_values',),
@@ -249,7 +243,7 @@ def main(model_path, simulation_time):
             'fluxes_values': ('fluxes_values',),
             'current_env_consumption': ('current_env_consumption_value',),
             'concentration': ('concentration',),
-            'Current_V0': ('Current_V0',)
+            'current_v0': ('current_v0',)
         }
     }
     sim = Engine(processes=processes, topology=topology)
@@ -257,3 +251,4 @@ def main(model_path, simulation_time):
     data = sim.emitter.get_data()
     output = pf(data)
     return data, output, processes, topology
+

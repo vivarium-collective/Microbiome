@@ -8,16 +8,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Models/dFBA_processes.py" beforeDir="false" afterPath="$PROJECT_DIR$/Models/dFBA_processes.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Notebooks/dFBA.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Notebooks/dFBA.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plots/escher_plot__dFBA_time_step_2.html" beforeDir="false" afterPath="$PROJECT_DIR$/Plots/escher_plot__dFBA_time_step_2.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/template/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/template/composites/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/template/composites/injected_glc_phosphorylation.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/template/experiments/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/template/experiments/glucose_phosphorylation.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/template/library/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/template/processes/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/template/processes/glucose_phosphorylation.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/template/processes/template_process.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,13 +72,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Models/dFBA_processes.py</url>
-          <line>134</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
