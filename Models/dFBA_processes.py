@@ -55,9 +55,9 @@ class ReactionBounds(Process):
 
     def next_update(self, timestep, state):
         # Apply 10% reaction_bound_change, it can be any function the user wants
-        percentage = 0.001
+        percentage = 0.01
         updated_bounds = {}
-        current_v0 = state['current_v0']
+        current_v0 = - state['current_v0']
 
         if timestep == 0:
             updated_bounds = self.bounds
@@ -173,9 +173,9 @@ class EnvCalculator(Process):
 
     defaults = {
         'init_concentration': 11.1,
-        'volume': 1,
+        'volume': 10,
         'vmax': 10.01,
-        'km': 0.002111
+        'km': 0.01
     }
 
     def __init__(self, parameters=None):
@@ -213,20 +213,19 @@ class EnvCalculator(Process):
         env_consumption = 0
         if "EX_glc__D_e" in fluxes_values:
             env_consumption = (
-                    current_biomass * fluxes_values["EX_glc__D_e"] * TIME_PROPORTION
+                    current_biomass * (-fluxes_values["EX_glc__D_e"]) * TIME_PROPORTION
             )
         delta_c = env_consumption / self.parameters['volume']
-        concentration -= abs(delta_c)
+        concentration += (-delta_c)
         current_v0 = self.parameters['vmax'] * concentration / (self.parameters['km'] + concentration)
 
         return {
             "current_env_consumption": env_consumption,
-            "concentration": -abs(delta_c),
+            "concentration": - delta_c,
             "current_v0": current_v0
         }
 
-
-def main(model_path, simulation_time):
+def main(model_path, simulation_time, env_parameters):
     """
     This function runs the simulation for a specified duration.
 
@@ -243,7 +242,7 @@ def main(model_path, simulation_time):
     initial_objective_flux = initial_objective_flux_update["objective_flux"]
     parameters["initial_objective_flux"] = initial_objective_flux
     biomass_calculator = BiomassCalculator(parameters)
-    env_calculator = EnvCalculator(parameters)
+    env_calculator = EnvCalculator(env_parameters)
     processes = {
         'ReactionBounds': reaction_bounds,
         'DynamicFBA': dynamic_fba,
@@ -279,4 +278,5 @@ def main(model_path, simulation_time):
     data = sim.emitter.get_data()
     output = pf(data)
     return data, output, processes, topology
+
 
