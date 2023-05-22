@@ -54,8 +54,6 @@ class ReactionBounds(Process):
         }
 
     def next_update(self, timestep, state):
-        # Apply 10% reaction_bound_change, it can be any function the user wants
-        percentage = 0.01
         updated_bounds = {}
         current_v0 = - state['current_v0']
 
@@ -64,14 +62,19 @@ class ReactionBounds(Process):
         else:
             current_bounds = state["reaction_bounds"]
             for reaction_id, old_bounds in current_bounds.items():
-                new_lower_bound = old_bounds[0] * (1 - (percentage * timestep))
-                new_upper_bound = old_bounds[1] * (1 - (percentage * timestep))
+                # Removed the calculation of new bounds based on the percentage and timestep.
+                # The original bounds are now used.
+
+                new_lower_bound = old_bounds[0]
+                new_upper_bound = old_bounds[1]
+
                 if reaction_id == "EX_glc__D_e":
                     new_lower_bound = max(new_lower_bound, current_v0)
                 new_bounds = (new_lower_bound, new_upper_bound)
                 updated_bounds[reaction_id] = new_bounds
 
         return {"reaction_bounds": updated_bounds}
+
 class DynamicFBA(Process):
     """
     This class conducts the flux balance analysis for the model.
