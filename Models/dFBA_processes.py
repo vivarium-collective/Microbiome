@@ -23,11 +23,14 @@ class ReactionBounds(Process):
     """
     This class initializes and updates the reaction bounds for the model.
 
-    ReactionBounds ingests a COBRA model, creating an initial dictionary of reaction bounds. For each update, it adjusts the reaction bounds considering a predefined aging percentage and resource limitation. The resource limitation is evaluated based on the available resources and their consumption at each timestep. This class also receives v0 from the EnvCalculator class, which represents the flux calculated using the current glucose concentration by the Michaelis-Menten equation.
+    ReactionBounds ingests a COBRA model, creating an initial dictionary of reaction bounds. For each update, it adjusts the reaction bounds considering a predefined aging percentage and resource limitation. The resource limitation is evaluated based on the available resources and their consumption at each timestep. This class now also computes the current_v0 value, which represents the flux calculated using the current glucose concentration by the Michaelis-Menten equation.
     """
 
     defaults = {
         'model_file': None,
+        'vmax': 10.01,
+        'km': 0.01,
+        'init_concentration': 11.1,
     }
 
     def __init__(self, parameters=None):
@@ -49,21 +52,27 @@ class ReactionBounds(Process):
                 '_updater': 'set'
             },
             "current_v0": {
-                '_default': 10.0
+                '_default': 10.0,
+                '_emit': True,
+            },
+            "concentration": {
+                '_default': self.parameters['init_concentration'],
+                '_emit': True,
+                "_updater": "accumulate",
             }
         }
 
     def next_update(self, timestep, state):
         updated_bounds = {}
-        current_v0 = - state['current_v0']
+        concentration = state['concentration']
+        current_v0 = self.parameters['vmax'] * concentration / (self.parameters['km'] + concentration)
+        current_v0 = - current_v0
 
         if timestep == 0:
             updated_bounds = self.bounds
         else:
             current_bounds = state["reaction_bounds"]
             for reaction_id, old_bounds in current_bounds.items():
-                # Removed the calculation of new bounds based on the percentage and timestep.
-                # The original bounds are now used.
 
                 new_lower_bound = old_bounds[0]
                 new_upper_bound = old_bounds[1]
@@ -73,7 +82,11 @@ class ReactionBounds(Process):
                 new_bounds = (new_lower_bound, new_upper_bound)
                 updated_bounds[reaction_id] = new_bounds
 
-        return {"reaction_bounds": updated_bounds}
+        return {
+            "reaction_bounds": updated_bounds,
+            "current_v0": current_v0,
+        }
+
 
 class DynamicFBA(Process):
     """
@@ -171,14 +184,12 @@ class EnvCalculator(Process):
     """
     This class estimates the environmental consumption (Glucose in this case) and concentration.
 
-    EnvCalculator calculates the environmental consumption using the current biomass and flux values. It also updates the concentration and current v0 values using the Michaelis-Menten equation.
+    EnvCalculator calculates the environmental consumption using the current biomass and flux values. It also updates the concentration.
     """
 
     defaults = {
         'init_concentration': 11.1,
         'volume': 10,
-        'vmax': 10.01,
-        'km': 0.01
     }
 
     def __init__(self, parameters=None):
@@ -202,11 +213,6 @@ class EnvCalculator(Process):
                 "_emit": True,
                 "_updater": "accumulate",
             },
-            "current_v0": {
-                "_default": 10.0,
-                "_emit": True,
-                "_updater": "set",
-            }
         }
 
     def next_update(self, timestep, state):
@@ -220,22 +226,27 @@ class EnvCalculator(Process):
             )
         delta_c = env_consumption / self.parameters['volume']
         concentration += (-delta_c)
-        current_v0 = self.parameters['vmax'] * concentration / (self.parameters['km'] + concentration)
 
         return {
             "current_env_consumption": env_consumption,
             "concentration": - delta_c,
-            "current_v0": current_v0
         }
 
-def main(model_path, simulation_time, env_parameters):
+
+
+def main(model_path, simulation_time, env_parameters, init_concentration):
     """
     This function runs the simulation for a specified duration.
 
     It initializes the ReactionBounds, DynamicFBA, BiomassCalculator, and EnvCalculator processes, establishes the topology between these processes, and executes the simulation for the specified timeframe.
     """
+    parameters = {
+        "model_file": model_path,
+        "vmax": env_parameters['vmax'],
+        "km": env_parameters['km'],
+        "init_concentration": init_concentration
+    }
 
-    parameters = {"model_file": model_path}
     reaction_bounds = ReactionBounds(parameters)
     parameters['reaction_bounds'] = reaction_bounds
     dynamic_fba = DynamicFBA(parameters)
@@ -245,6 +256,8 @@ def main(model_path, simulation_time, env_parameters):
     initial_objective_flux = initial_objective_flux_update["objective_flux"]
     parameters["initial_objective_flux"] = initial_objective_flux
     biomass_calculator = BiomassCalculator(parameters)
+
+    env_parameters['init_concentration'] = init_concentration
     env_calculator = EnvCalculator(env_parameters)
     processes = {
         'ReactionBounds': reaction_bounds,
@@ -256,7 +269,8 @@ def main(model_path, simulation_time, env_parameters):
     topology = {
         'ReactionBounds': {
             'reaction_bounds': ('reaction_bounds',),
-            'current_v0': ('current_v0',)
+            'current_v0': ('current_v0',),
+            'concentration': ('concentration',)
         },
         'DynamicFBA': {
             'fluxes': ('fluxes_values',),
@@ -272,10 +286,10 @@ def main(model_path, simulation_time, env_parameters):
             'current_biomass': ('current_biomass_value',),
             'fluxes_values': ('fluxes_values',),
             'current_env_consumption': ('current_env_consumption_value',),
-            'concentration': ('concentration',),
-            'current_v0': ('current_v0',)
+            'concentration': ('concentration',)
         }
     }
+
     sim = Engine(processes=processes, topology=topology)
     sim.update(simulation_time)
     data = sim.emitter.get_data()
