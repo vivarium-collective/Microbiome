@@ -111,7 +111,7 @@ class ReactionBounds(Process):
 
     defaults = {
         'model_file': None,
-        'enz-conc': 1,
+        'enz_concentration': 1,  # Modified to use 'enz_concentration'
         'kcat': 10,
         'km': 0.01,
         'init_concentration': 11.1,
@@ -143,13 +143,18 @@ class ReactionBounds(Process):
                 '_default': self.parameters['init_concentration'],
                 '_emit': True,
                 "_updater": "accumulate",
-            }
+            },
+            "enz_concentration": {  # New port for 'enz_concentration'
+                "_default": self.parameters['enz_concentration'],
+                "_updater": "set"
+            },
         }
 
     def next_update(self, timestep, state):
         updated_bounds = {}
         concentration = state['concentration']
-        vmax = self.parameters['kcat'] * self.parameters['enz-conc']
+        enz_concentration = state['enz_concentration']  # Use 'enz_concentration' instead of 'enz-conc'
+        vmax = self.parameters['kcat'] * enz_concentration
         current_v0 = vmax * concentration / (self.parameters['km'] + concentration)
         current_v0 = - current_v0
 
@@ -170,6 +175,7 @@ class ReactionBounds(Process):
             "reaction_bounds": updated_bounds,
             "current_v0": current_v0,
         }
+
 
 
 
@@ -364,7 +370,8 @@ def main(model_path, simulation_time, env_parameters, init_concentration):
         'ReactionBounds': {
             'reaction_bounds': ('reaction_bounds',),
             'current_v0': ('current_v0',),
-            'concentration': ('concentration',)
+            'concentration': ('concentration',),
+            'enz_concentration': ('ProteinExpression', 'enz_concentration')
         },
         'DynamicFBA': {
             'fluxes': ('fluxes_values',),
