@@ -28,7 +28,8 @@ class ReactionBounds(Process):
 
     defaults = {
         'model_file': None,
-        'vmax': 10.01,
+        'enz-conc': 1,
+        'kcat': 10,
         'km': 0.01,
         'init_concentration': 11.1,
     }
@@ -65,7 +66,8 @@ class ReactionBounds(Process):
     def next_update(self, timestep, state):
         updated_bounds = {}
         concentration = state['concentration']
-        current_v0 = self.parameters['vmax'] * concentration / (self.parameters['km'] + concentration)
+        vmax = self.parameters['kcat'] * self.parameters['enz-conc']
+        current_v0 = vmax * concentration / (self.parameters['km'] + concentration)
         current_v0 = - current_v0
 
         if timestep == 0:
@@ -73,7 +75,6 @@ class ReactionBounds(Process):
         else:
             current_bounds = state["reaction_bounds"]
             for reaction_id, old_bounds in current_bounds.items():
-
                 new_lower_bound = old_bounds[0]
                 new_upper_bound = old_bounds[1]
 
@@ -86,6 +87,7 @@ class ReactionBounds(Process):
             "reaction_bounds": updated_bounds,
             "current_v0": current_v0,
         }
+
 
 
 class DynamicFBA(Process):
@@ -242,7 +244,6 @@ def main(model_path, simulation_time, env_parameters, init_concentration):
     """
     parameters = {
         "model_file": model_path,
-        "vmax": env_parameters['vmax'],
         "km": env_parameters['km'],
         "init_concentration": init_concentration
     }
