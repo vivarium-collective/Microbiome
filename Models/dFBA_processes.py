@@ -14,9 +14,92 @@ subtracting it from the environmental glucose concentration.
 from vivarium.core.process import Process
 from vivarium.core.engine import Engine, pf
 from cobra.io import read_sbml_model
-
+import random
 # Add the Time_proportion variable, We consider each time-step a minute
 TIME_PROPORTION = (1 / 60)  # we set each time-step as an hour and the Time_proportion as a minute
+
+
+class RegulatoryProtein(Process):
+    """
+    This class generates a random number (regulation_probability) between 0 and 1.
+    """
+    defaults = {
+        'regulation_probability': 0.5,
+    }
+
+    def ports_schema(self):
+        return {
+            'regulation_probability': {
+                '_default': self.parameters['regulation_probability'],
+                '_emit': True,
+                "_updater": "set"
+            },
+        }
+
+    def next_update(self, timestep, state):
+        regulation_probability = random.uniform(0, 1)
+        return {
+            'regulation_probability': regulation_probability
+        }
+
+
+class GeneExpression(Process):
+    """
+    This class multiplies the regulation_probability by 10.
+    """
+    defaults = {
+        'gene_expression': 0.0,
+    }
+
+    def ports_schema(self):
+        return {
+            'gene_expression': {
+                '_default': self.parameters['gene_expression'],
+                '_emit': True,
+                "_updater": "set"
+            },
+            'regulation_probability': {
+                '_default': 0.0,
+                "_updater": "set"
+            },
+        }
+
+    def next_update(self, timestep, state):
+        regulation_probability = state['regulation_probability']
+        gene_expression = regulation_probability * 10
+        return {
+            'gene_expression': gene_expression
+        }
+
+
+class ProteinExpression(Process):
+    """
+    This class multiplies gene_expression by 10.
+    """
+    defaults = {
+        'enz_concentration': 0.0,
+    }
+
+    def ports_schema(self):
+        return {
+            'enz_concentration': {
+                '_default': self.parameters['enz_concentration'],
+                '_emit': True,
+                "_updater": "set"
+            },
+            'gene_expression': {
+                '_default': 0.0,
+                "_updater": "set"
+            },
+        }
+
+    def next_update(self, timestep, state):
+        gene_expression = state['gene_expression']
+        enz_concentration = gene_expression * 10
+        return {
+            'enz_concentration': enz_concentration
+        }
+
 
 
 class ReactionBounds(Process):
@@ -240,7 +323,9 @@ def main(model_path, simulation_time, env_parameters, init_concentration):
     """
     This function runs the simulation for a specified duration.
 
-    It initializes the ReactionBounds, DynamicFBA, BiomassCalculator, and EnvCalculator processes, establishes the topology between these processes, and executes the simulation for the specified timeframe.
+    It initializes the ReactionBounds, DynamicFBA, BiomassCalculator, EnvCalculator,
+    RegulatoryProtein, GeneExpression and ProteinExpression processes,
+    establishes the topology between these processes, and executes the simulation for the specified timeframe.
     """
     parameters = {
         "model_file": model_path,
@@ -260,11 +345,19 @@ def main(model_path, simulation_time, env_parameters, init_concentration):
 
     env_parameters['init_concentration'] = init_concentration
     env_calculator = EnvCalculator(env_parameters)
+
+    regulatory_protein = RegulatoryProtein()
+    gene_expression = GeneExpression()
+    protein_expression = ProteinExpression()
+
     processes = {
         'ReactionBounds': reaction_bounds,
         'DynamicFBA': dynamic_fba,
         'BiomassCalculator': biomass_calculator,
-        'EnvCalculator': env_calculator
+        'EnvCalculator': env_calculator,
+        'RegulatoryProtein': regulatory_protein,
+        'GeneExpression': gene_expression,
+        'ProteinExpression': protein_expression
     }
 
     topology = {
@@ -288,6 +381,17 @@ def main(model_path, simulation_time, env_parameters, init_concentration):
             'fluxes_values': ('fluxes_values',),
             'current_env_consumption': ('current_env_consumption_value',),
             'concentration': ('concentration',)
+        },
+        'RegulatoryProtein': {
+            'regulation_probability': ('regulation_probability',)
+        },
+        'GeneExpression': {
+            'regulation_probability': ('regulation_probability',),
+            'gene_expression': ('gene_expression',)
+        },
+        'ProteinExpression': {
+            'gene_expression': ('gene_expression',),
+            'enz_concentration': ('enz_concentration',)
         }
     }
 
@@ -296,5 +400,6 @@ def main(model_path, simulation_time, env_parameters, init_concentration):
     data = sim.emitter.get_data()
     output = pf(data)
     return data, output, processes, topology
+
 
 
