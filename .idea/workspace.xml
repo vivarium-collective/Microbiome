@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9820cd3d-398b-473c-839d-88c6cbae95bc" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Models/dFBA_processes.py" beforeDir="false" afterPath="$PROJECT_DIR$/Models/dFBA_processes.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Notebooks/dFBA.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Notebooks/dFBA.ipynb" afterDir="false" />
     </list>

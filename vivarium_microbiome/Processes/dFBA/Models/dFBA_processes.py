@@ -371,7 +371,7 @@ def main(model_path, simulation_time, env_parameters, init_concentration):
             'reaction_bounds': ('reaction_bounds',),
             'current_v0': ('current_v0',),
             'concentration': ('concentration',),
-            'enz_concentration': ('ProteinExpression', 'enz_concentration')
+            'enz_concentration': ( 'enz_concentration',)
         },
         'DynamicFBA': {
             'fluxes': ('fluxes_values',),
