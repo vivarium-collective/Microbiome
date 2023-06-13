@@ -22,7 +22,7 @@ your project.
 
 ------------------------------------------------------------------------
 
-# Project Name
+# Microbiome Multiscale Modeling Project
 
 <!--
 TODO: Microbiome Multiscale Modeling
