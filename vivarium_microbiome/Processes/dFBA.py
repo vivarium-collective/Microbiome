@@ -11,7 +11,7 @@ limitations by calculating the glucose usage at each time step, subsequently
 subtracting it from the environmental glucose concentration.
 """
 
-from vivarium.core.process import Process
+from vivarium.core.process import Process, Step
 from vivarium.core.engine import Engine, pf
 from cobra.io import read_sbml_model
 import random
@@ -19,9 +19,9 @@ import random
 TIME_PROPORTION = (1 / 60)  # we set each time-step as an hour and the Time_proportion as a minute
 
 
-class RegulatoryProtein(Process):
+class RegulatoryProtein(Step):
     """
-    This class generates a random number (regulation_probability) between 0 and 1.
+    This class generates a random number (regulation_probability) between 0.0001 and 1.
     """
     defaults = {
         'regulation_probability': 0.5,
@@ -37,7 +37,7 @@ class RegulatoryProtein(Process):
         }
 
     def next_update(self, timestep, state):
-        regulation_probability = random.uniform(0, 1)
+        regulation_probability = random.uniform(0.0001, 1)
         return {
             'regulation_probability': regulation_probability
         }
@@ -48,7 +48,7 @@ class GeneExpression(Process):
     This class multiplies the regulation_probability by 10.
     """
     defaults = {
-        'gene_expression': 0.0,
+        'gene_expression': 0.55,  #initial value of gene_expression
     }
 
     def ports_schema(self):
@@ -59,7 +59,7 @@ class GeneExpression(Process):
                 "_updater": "set"
             },
             'regulation_probability': {
-                '_default': 0.0,
+                '_default': 0.5,
                 "_updater": "set"
             },
         }
@@ -77,7 +77,7 @@ class ProteinExpression(Process):
     This class multiplies gene_expression by 10.
     """
     defaults = {
-        'enz_concentration': 0.0,
+        'enz_concentration': 5.0,  #initial value of enz_concentration
     }
 
     def ports_schema(self):
@@ -88,7 +88,6 @@ class ProteinExpression(Process):
                 "_updater": "set"
             },
             'gene_expression': {
-                '_default': 0.0,
                 "_updater": "set"
             },
         }
@@ -111,9 +110,8 @@ class ReactionBounds(Process):
 
     defaults = {
         'model_file': None,
-        'enz_concentration': 1,  # Modified to use 'enz_concentration'
+        'enz_concentration': 5,
         'kcat': 10,
-        'km': 0.01,
         'init_concentration': 11.1,
     }
 
@@ -121,6 +119,7 @@ class ReactionBounds(Process):
         super().__init__(parameters=parameters)
         self.model = read_sbml_model(self.parameters['model_file'])
         self.bounds = self.initialize_bounds()
+        self.initial_upper_bound = None # an attribute to hold the initial upper bound
 
     def initialize_bounds(self):
         bounds = {}
@@ -138,13 +137,14 @@ class ReactionBounds(Process):
             "current_v0": {
                 '_default': 10.0,
                 '_emit': True,
+                '_updater': 'set'
             },
             "concentration": {
                 '_default': self.parameters['init_concentration'],
                 '_emit': True,
                 "_updater": "accumulate",
             },
-            "enz_concentration": {  # New port for 'enz_concentration'
+            "enz_concentration": {
                 "_default": self.parameters['enz_concentration'],
                 "_updater": "set"
             },
@@ -156,27 +156,29 @@ class ReactionBounds(Process):
         enz_concentration = state['enz_concentration']  # Use 'enz_concentration' instead of 'enz-conc'
         vmax = self.parameters['kcat'] * enz_concentration
         current_v0 = vmax * concentration / (self.parameters['km'] + concentration)
-        current_v0 = - current_v0
-
+        #current_v0 = - current_v0
         if timestep == 0:
             updated_bounds = self.bounds
         else:
             current_bounds = state["reaction_bounds"]
             for reaction_id, old_bounds in current_bounds.items():
-                new_lower_bound = old_bounds[0]
-                new_upper_bound = old_bounds[1]
-
                 if reaction_id == "EX_glc__D_e":
-                    new_lower_bound = max(new_lower_bound, current_v0)
-                new_bounds = (new_lower_bound, new_upper_bound)
-                updated_bounds[reaction_id] = new_bounds
+                    if self.initial_upper_bound is None:  # If the initial upper bound has not been stored yet
+                        self.initial_upper_bound = old_bounds[1]  # Store the initial upper bound
+                    print("current_v0 =", current_v0, "old_upper_bound =", old_bounds[1], "initial_upper_bound =", self.initial_upper_bound)
+                    new_upper_bound = min(self.initial_upper_bound, current_v0)
+                    new_bounds = (old_bounds[0], new_upper_bound)  # keep the old lower bound
+                    updated_bounds[reaction_id] = new_bounds
+                    print("new_bounds", new_bounds)
+                # else:
+                #     new_upper_bound = old_bounds[1]  # if condition is not met, keep the old upper bound
+
+
 
         return {
             "reaction_bounds": updated_bounds,
             "current_v0": current_v0,
         }
-
-
 
 
 class DynamicFBA(Process):
@@ -325,7 +327,7 @@ class EnvCalculator(Process):
 
 
 
-def main(model_path, simulation_time, env_parameters, init_concentration):
+def main(model_path, simulation_time, env_parameters, init_concentration, initial_state=None):
     """
     This function runs the simulation for a specified duration.
 
@@ -333,25 +335,22 @@ def main(model_path, simulation_time, env_parameters, init_concentration):
     RegulatoryProtein, GeneExpression and ProteinExpression processes,
     establishes the topology between these processes, and executes the simulation for the specified timeframe.
     """
+    initial_state = initial_state or {}
     parameters = {
         "model_file": model_path,
         "km": env_parameters['km'],
         "init_concentration": init_concentration
     }
-
     reaction_bounds = ReactionBounds(parameters)
     parameters['reaction_bounds'] = reaction_bounds
     dynamic_fba = DynamicFBA(parameters)
-
     initial_state = {"reaction_bounds": reaction_bounds.bounds}
     initial_objective_flux_update = dynamic_fba.next_update(1, initial_state)
     initial_objective_flux = initial_objective_flux_update["objective_flux"]
     parameters["initial_objective_flux"] = initial_objective_flux
     biomass_calculator = BiomassCalculator(parameters)
-
     env_parameters['init_concentration'] = init_concentration
     env_calculator = EnvCalculator(env_parameters)
-
     regulatory_protein = RegulatoryProtein()
     gene_expression = GeneExpression()
     protein_expression = ProteinExpression()
@@ -402,7 +401,7 @@ def main(model_path, simulation_time, env_parameters, init_concentration):
         }
     }
 
-    sim = Engine(processes=processes, topology=topology)
+    sim = Engine(processes=processes, topology=topology, initial_state=initial_state)
     sim.update(simulation_time)
     data = sim.emitter.get_data()
     output = pf(data)

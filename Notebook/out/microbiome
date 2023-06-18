@@ -1,0 +1,125 @@
+digraph bigraph {
+	dpi=70 overlap=false rankdir=TB size="16,10"
+	node [fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	"('microbiome',)" [label=<microbiome>]
+	"('microbiome', 'environment')" [label=<environment>]
+	"('microbiome', 'environment', 'concentration')" [label=<concentration>]
+	"('microbiome', 'environment', 'current_env_consumption_value')" [label=<current_env_consumption_value>]
+	"('microbiome', 'bacteria')" [label=<bacteria>]
+	"('microbiome', 'bacteria', 'enz_concentration')" [label=<enz_concentration>]
+	"('microbiome', 'bacteria', 'gene_expression')" [label=<gene_expression>]
+	"('microbiome', 'bacteria', 'regulation_probability')" [label=<regulation_probability>]
+	"('microbiome', 'bacteria', 'current_biomass_value')" [label=<current_biomass_value>]
+	"('microbiome', 'bacteria', 'objective_flux_value')" [label=<objective_flux_value>]
+	"('microbiome', 'bacteria', 'reaction_bounds')" [label=<reaction_bounds>]
+	"('microbiome', 'bacteria', 'reactions_list')" [label=<reactions_list>]
+	"('microbiome', 'bacteria', 'fluxes_values')" [label=<fluxes_values>]
+	"('microbiome', 'bacteria', 'concentration')" [label=<concentration>]
+	"('microbiome', 'bacteria', 'current_v0')" [label=<current_v0>]
+	node [constraint=false fontsize="12pt" penwidth=2 shape=box]
+	"('microbiome', 'environment', 'EnvCalculator')" [label=<EnvCalculator>]
+	"('microbiome', 'bacteria', 'ReactionBounds')" [label=<ReactionBounds>]
+	"('microbiome', 'bacteria', 'DynamicFBA')" [label=<DynamicFBA>]
+	"('microbiome', 'bacteria', 'BiomassCalculator')" [label=<BiomassCalculator>]
+	"('microbiome', 'bacteria', 'RegulatoryProtein')" [label=<RegulatoryProtein>]
+	"('microbiome', 'bacteria', 'GeneExpression')" [label=<GeneExpression>]
+	"('microbiome', 'bacteria', 'ProteinExpression')" [label=<ProteinExpression>]
+	edge [arrowhead=none penwidth=2]
+	edge [style=filled]
+	"('microbiome', 'environment')" -> "('microbiome', 'environment', 'EnvCalculator')"
+	edge [style=filled]
+	"('microbiome', 'environment')" -> "('microbiome', 'environment', 'concentration')"
+	edge [style=filled]
+	"('microbiome', 'environment')" -> "('microbiome', 'environment', 'current_env_consumption_value')"
+	edge [style=filled]
+	"('microbiome', 'bacteria')" -> "('microbiome', 'bacteria', 'ReactionBounds')"
+	edge [style=filled]
+	"('microbiome', 'bacteria')" -> "('microbiome', 'bacteria', 'DynamicFBA')"
+	edge [style=filled]
+	"('microbiome', 'bacteria')" -> "('microbiome', 'bacteria', 'BiomassCalculator')"
+	edge [style=filled]
+	"('microbiome', 'bacteria')" -> "('microbiome', 'bacteria', 'RegulatoryProtein')"
+	edge [style=filled]
+	"('microbiome', 'bacteria')" -> "('microbiome', 'bacteria', 'GeneExpression')"
+	edge [style=filled]
+	"('microbiome', 'bacteria')" -> "('microbiome', 'bacteria', 'ProteinExpression')"
+	edge [style=filled]
+	"('microbiome', 'bacteria')" -> "('microbiome', 'bacteria', 'enz_concentration')"
+	edge [style=filled]
+	"('microbiome', 'bacteria')" -> "('microbiome', 'bacteria', 'gene_expression')"
+	edge [style=filled]
+	"('microbiome', 'bacteria')" -> "('microbiome', 'bacteria', 'regulation_probability')"
+	edge [style=filled]
+	"('microbiome', 'bacteria')" -> "('microbiome', 'bacteria', 'current_biomass_value')"
+	edge [style=filled]
+	"('microbiome', 'bacteria')" -> "('microbiome', 'bacteria', 'objective_flux_value')"
+	edge [style=filled]
+	"('microbiome', 'bacteria')" -> "('microbiome', 'bacteria', 'reaction_bounds')"
+	edge [style=filled]
+	"('microbiome', 'bacteria')" -> "('microbiome', 'bacteria', 'reactions_list')"
+	edge [style=filled]
+	"('microbiome', 'bacteria')" -> "('microbiome', 'bacteria', 'fluxes_values')"
+	edge [style=filled]
+	"('microbiome', 'bacteria')" -> "('microbiome', 'bacteria', 'concentration')"
+	edge [style=filled]
+	"('microbiome', 'bacteria')" -> "('microbiome', 'bacteria', 'current_v0')"
+	edge [style=filled]
+	"('microbiome',)" -> "('microbiome', 'environment')"
+	edge [style=filled]
+	"('microbiome',)" -> "('microbiome', 'bacteria')"
+	edge [arrowhead=dot arrowsize=0.5 penwidth=1 style=dashed]
+	"('microbiome', 'bacteria', 'current_biomass_value')" [label=<current_biomass_value> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	"('microbiome', 'bacteria', 'fluxes_values')" [label=<fluxes_values> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	"('microbiome', 'environment', 'current_env_consumption_value')" [label=<current_env_consumption_value> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	"('microbiome', 'environment', 'concentration')" [label=<concentration> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	subgraph "('microbiome', 'environment', 'EnvCalculator')" {
+		"('microbiome', 'bacteria', 'current_biomass_value')" -> "('microbiome', 'environment', 'EnvCalculator')" [label=<current_biomass> fontsize="10pt" labelloc=t]
+		"('microbiome', 'bacteria', 'fluxes_values')" -> "('microbiome', 'environment', 'EnvCalculator')" [label=<fluxes_values> fontsize="10pt" labelloc=t]
+		"('microbiome', 'environment', 'current_env_consumption_value')" -> "('microbiome', 'environment', 'EnvCalculator')" [label=<current_env_consumption> fontsize="10pt" labelloc=t]
+		"('microbiome', 'environment', 'concentration')" -> "('microbiome', 'environment', 'EnvCalculator')" [label=<concentration> fontsize="10pt" labelloc=t]
+	}
+	"('microbiome', 'bacteria', 'reaction_bounds')" [label=<reaction_bounds> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	"('microbiome', 'bacteria', 'current_v0')" [label=<current_v0> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	"('microbiome', 'bacteria', 'concentration')" [label=<concentration> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	"('microbiome', 'bacteria', 'enz_concentration')" [label=<enz_concentration> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	subgraph "('microbiome', 'bacteria', 'ReactionBounds')" {
+		"('microbiome', 'bacteria', 'reaction_bounds')" -> "('microbiome', 'bacteria', 'ReactionBounds')" [label=<reaction_bounds> fontsize="10pt" labelloc=t]
+		"('microbiome', 'bacteria', 'current_v0')" -> "('microbiome', 'bacteria', 'ReactionBounds')" [label=<current_v0> fontsize="10pt" labelloc=t]
+		"('microbiome', 'bacteria', 'concentration')" -> "('microbiome', 'bacteria', 'ReactionBounds')" [label=<concentration> fontsize="10pt" labelloc=t]
+		"('microbiome', 'bacteria', 'enz_concentration')" -> "('microbiome', 'bacteria', 'ReactionBounds')" [label=<enz_concentration> fontsize="10pt" labelloc=t]
+	}
+	"('microbiome', 'bacteria', 'fluxes_values')" [label=<fluxes_values> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	"('microbiome', 'bacteria', 'reactions_list')" [label=<reactions_list> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	"('microbiome', 'bacteria', 'objective_flux_value')" [label=<objective_flux_value> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	"('microbiome', 'bacteria', 'reaction_bounds')" [label=<reaction_bounds> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	subgraph "('microbiome', 'bacteria', 'DynamicFBA')" {
+		"('microbiome', 'bacteria', 'fluxes_values')" -> "('microbiome', 'bacteria', 'DynamicFBA')" [label=<fluxes> fontsize="10pt" labelloc=t]
+		"('microbiome', 'bacteria', 'reactions_list')" -> "('microbiome', 'bacteria', 'DynamicFBA')" [label=<reactions> fontsize="10pt" labelloc=t]
+		"('microbiome', 'bacteria', 'objective_flux_value')" -> "('microbiome', 'bacteria', 'DynamicFBA')" [label=<objective_flux> fontsize="10pt" labelloc=t]
+		"('microbiome', 'bacteria', 'reaction_bounds')" -> "('microbiome', 'bacteria', 'DynamicFBA')" [label=<reaction_bounds> fontsize="10pt" labelloc=t]
+	}
+	"('microbiome', 'bacteria', 'objective_flux_value')" [label=<objective_flux_value> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	"('microbiome', 'bacteria', 'current_biomass_value')" [label=<current_biomass_value> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	subgraph "('microbiome', 'bacteria', 'BiomassCalculator')" {
+		"('microbiome', 'bacteria', 'objective_flux_value')" -> "('microbiome', 'bacteria', 'BiomassCalculator')" [label=<objective_flux> fontsize="10pt" labelloc=t]
+		"('microbiome', 'bacteria', 'current_biomass_value')" -> "('microbiome', 'bacteria', 'BiomassCalculator')" [label=<current_biomass> fontsize="10pt" labelloc=t]
+	}
+	"('microbiome', 'bacteria', 'regulation_probability')" [label=<regulation_probability> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	subgraph "('microbiome', 'bacteria', 'RegulatoryProtein')" {
+		"('microbiome', 'bacteria', 'regulation_probability')" -> "('microbiome', 'bacteria', 'RegulatoryProtein')" [label=<regulation_probability> fontsize="10pt" labelloc=t]
+	}
+	"('microbiome', 'bacteria', 'regulation_probability')" [label=<regulation_probability> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	"('microbiome', 'bacteria', 'gene_expression')" [label=<gene_expression> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	subgraph "('microbiome', 'bacteria', 'GeneExpression')" {
+		"('microbiome', 'bacteria', 'regulation_probability')" -> "('microbiome', 'bacteria', 'GeneExpression')" [label=<regulation_probability> fontsize="10pt" labelloc=t]
+		"('microbiome', 'bacteria', 'gene_expression')" -> "('microbiome', 'bacteria', 'GeneExpression')" [label=<gene_expression> fontsize="10pt" labelloc=t]
+	}
+	"('microbiome', 'bacteria', 'gene_expression')" [label=<gene_expression> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	"('microbiome', 'bacteria', 'enz_concentration')" [label=<enz_concentration> fontsize="12pt" margin=0.05 penwidth=2 shape=circle]
+	subgraph "('microbiome', 'bacteria', 'ProteinExpression')" {
+		"('microbiome', 'bacteria', 'gene_expression')" -> "('microbiome', 'bacteria', 'ProteinExpression')" [label=<gene_expression> fontsize="10pt" labelloc=t]
+		"('microbiome', 'bacteria', 'enz_concentration')" -> "('microbiome', 'bacteria', 'ProteinExpression')" [label=<enz_concentration> fontsize="10pt" labelloc=t]
+	}
+	edge [arrowhead=dot arrowsize=0.5 penwidth=1 style=dashed]
+	edge [arrowhead=none arrowtail=dot dir=both penwidth=1 style=dashed]
+}
