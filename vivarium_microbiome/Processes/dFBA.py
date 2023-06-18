@@ -165,16 +165,9 @@ class ReactionBounds(Process):
                 if reaction_id == "EX_glc__D_e":
                     if self.initial_upper_bound is None:  # If the initial upper bound has not been stored yet
                         self.initial_upper_bound = old_bounds[1]  # Store the initial upper bound
-                    print("current_v0 =", current_v0, "old_upper_bound =", old_bounds[1], "initial_upper_bound =", self.initial_upper_bound)
                     new_upper_bound = min(self.initial_upper_bound, current_v0)
                     new_bounds = (old_bounds[0], new_upper_bound)  # keep the old lower bound
                     updated_bounds[reaction_id] = new_bounds
-                    print("new_bounds", new_bounds)
-                # else:
-                #     new_upper_bound = old_bounds[1]  # if condition is not met, keep the old upper bound
-
-
-
         return {
             "reaction_bounds": updated_bounds,
             "current_v0": current_v0,
