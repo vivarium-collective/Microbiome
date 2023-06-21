@@ -156,9 +156,9 @@ class ReactionBounds(Process):
         enz_concentration = state['enz_concentration']  # Use 'enz_concentration' instead of 'enz-conc'
         vmax = self.parameters['kcat'] * enz_concentration
         current_v0 = vmax * concentration / (self.parameters['km'] + concentration)
-        if timestep == 0:
-            updated_bounds = self.bounds
-        else:
+        updated_bounds = self.bounds
+        #print("timestep = ",timestep) ## Why it keep printing 1?
+        if timestep != 0:
             current_bounds = state["reaction_bounds"]
             for reaction_id, old_bounds in current_bounds.items():
                 if reaction_id == "EX_glc__D_e":     #it will be always none if the class was Step instead of Proccess. why?
@@ -167,6 +167,7 @@ class ReactionBounds(Process):
                     new_upper_bound = min(self.initial_upper_bound, current_v0)
                     new_bounds = (old_bounds[0], new_upper_bound)  # keep the old lower bound
                     updated_bounds[reaction_id] = new_bounds
+
         return {
             "reaction_bounds": updated_bounds,
             "current_v0": current_v0,
@@ -213,6 +214,10 @@ class DynamicFBA(Process):
 
     def next_update(self, timestep, state):
         reaction_bounds = state["reaction_bounds"]
+        # print(type(reaction_bounds))
+        # print(reaction_bounds)
+        # print("XXXXXXXXXXXXXXXXX")
+
         for reaction_id, (lower_bound, upper_bound) in reaction_bounds.items():
             reaction = self.model.reactions.get_by_id(reaction_id)
             reaction.lower_bound, reaction.upper_bound = lower_bound, upper_bound
