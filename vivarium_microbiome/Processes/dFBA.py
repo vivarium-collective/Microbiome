@@ -66,7 +66,7 @@ class GeneExpression(Process):
 
     def next_update(self, timestep, state):
         regulation_probability = state['regulation_probability']
-        gene_expression = regulation_probability * 10
+        gene_expression = regulation_probability * 10/10
         return {
             'gene_expression': gene_expression
         }
@@ -111,7 +111,7 @@ class ReactionBounds(Process):
     defaults = {
         'model_file': None,
         'enz_concentration': 5,
-        'kcat': 10,
+        'kcat': 5,
         'init_concentration': 11.1,
     }
 
@@ -120,6 +120,7 @@ class ReactionBounds(Process):
         self.model = read_sbml_model(self.parameters['model_file'])
         self.bounds = self.initialize_bounds()
         self.initial_upper_bound = None # an attribute to hold the initial upper bound
+        self.initial_lower_bound = None
 
     def initialize_bounds(self):
         bounds = {}
@@ -135,7 +136,7 @@ class ReactionBounds(Process):
                 '_updater': 'set'
             },
             "current_v0": {
-                '_default': 10.0,
+                '_default': - 10.0,
                 '_emit': True,
                 '_updater': 'set'
             },
@@ -151,21 +152,22 @@ class ReactionBounds(Process):
         }
 
     def next_update(self, timestep, state):
-        updated_bounds = {}
+        #updated_bounds = {}
         concentration = state['concentration']
         enz_concentration = state['enz_concentration']  # Use 'enz_concentration' instead of 'enz-conc'
         vmax = self.parameters['kcat'] * enz_concentration
         current_v0 = vmax * concentration / (self.parameters['km'] + concentration)
+        current_v0 = - current_v0  # it should be negative because it consumes glucose
         updated_bounds = self.bounds
-        #print("timestep = ",timestep) ## Why it keep printing 1?
         if timestep != 0:
             current_bounds = state["reaction_bounds"]
             for reaction_id, old_bounds in current_bounds.items():
-                if reaction_id == "EX_glc__D_e":     #it will be always none if the class was Step instead of Proccess. why?
-                    if self.initial_upper_bound is None:  # If the initial upper bound has not been stored yet
-                        self.initial_upper_bound = old_bounds[1]  # Store the initial upper bound
-                    new_upper_bound = min(self.initial_upper_bound, current_v0)
-                    new_bounds = (old_bounds[0], new_upper_bound)  # keep the old lower bound
+                if reaction_id == "EX_glc__D_e":  # it will be always none if the class was Step instead of Process. why?
+                    if self.initial_lower_bound is None:  # If the initial lower bound has not been stored yet
+                        self.initial_lower_bound = old_bounds[0]  # Store the initial lower bound
+                    new_lower_bound = max(self.initial_lower_bound,
+                                          current_v0)  # Take the maximum of the initial lower bound and current_v0
+                    new_bounds = (new_lower_bound, old_bounds[1])  # keep the old upper bound
                     updated_bounds[reaction_id] = new_bounds
 
         return {
@@ -214,17 +216,17 @@ class DynamicFBA(Process):
 
     def next_update(self, timestep, state):
         reaction_bounds = state["reaction_bounds"]
-        # print(type(reaction_bounds))
-        # print(reaction_bounds)
-        # print("XXXXXXXXXXXXXXXXX")
-
         for reaction_id, (lower_bound, upper_bound) in reaction_bounds.items():
+            #print(reaction_id, (lower_bound, upper_bound))
             reaction = self.model.reactions.get_by_id(reaction_id)
             reaction.lower_bound, reaction.upper_bound = lower_bound, upper_bound
+        #print("XXXXXXXXXXXXXXXXX")
 
         solution = self.model.optimize()
         objective_value = solution.objective_value
         fluxes = solution.fluxes.to_dict()
+        print(fluxes)
+        print("XXXXXXXXXXXXXXXXX")
         return {
             "fluxes": fluxes,
             "objective_flux": objective_value
