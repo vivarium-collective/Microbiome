@@ -136,7 +136,7 @@ class ReactionBounds(Process):
                 '_updater': 'set'
             },
             "current_v0": {
-                '_default': - 10.0,
+                '_default': -10.0,
                 '_emit': True,
                 '_updater': 'set'
             },
@@ -152,7 +152,6 @@ class ReactionBounds(Process):
         }
 
     def next_update(self, timestep, state):
-        #updated_bounds = {}
         concentration = state['concentration']
         enz_concentration = state['enz_concentration']  # Use 'enz_concentration' instead of 'enz-conc'
         vmax = self.parameters['kcat'] * enz_concentration
@@ -165,8 +164,7 @@ class ReactionBounds(Process):
                 if reaction_id == "EX_glc__D_e":  # it will be always none if the class was Step instead of Process. why?
                     if self.initial_lower_bound is None:  # If the initial lower bound has not been stored yet
                         self.initial_lower_bound = old_bounds[0]  # Store the initial lower bound
-                    new_lower_bound = max(self.initial_lower_bound,
-                                          current_v0)  # Take the maximum of the initial lower bound and current_v0
+                    new_lower_bound = max(self.initial_lower_bound, current_v0)  # Take the maximum of the initial lower bound and current_v0
                     new_bounds = (new_lower_bound, old_bounds[1])  # keep the old upper bound
                     updated_bounds[reaction_id] = new_bounds
 
