@@ -101,7 +101,7 @@ class ProteinExpression(Process):
 
 
 
-class ReactionBounds(Step):
+class ReactionBounds(Process):
     """
     This class initializes and updates the reaction bounds for the model.
 
@@ -156,22 +156,16 @@ class ReactionBounds(Step):
         enz_concentration = state['enz_concentration']  # Use 'enz_concentration' instead of 'enz-conc'
         vmax = self.parameters['kcat'] * enz_concentration
         current_v0 = vmax * concentration / (self.parameters['km'] + concentration)
-
-        print("vmax = ", vmax, "   kcat = ", self.parameters['kcat'], "   enz_concentration = ", enz_concentration)
-        print("concentration = ", concentration, "   enz_concentration = ", enz_concentration)
-        print("current_v0 =", current_v0, "  km = ", self.parameters['km'])
-        #current_v0 = - current_v0
         if timestep == 0:
             updated_bounds = self.bounds
         else:
             current_bounds = state["reaction_bounds"]
             for reaction_id, old_bounds in current_bounds.items():
-                if reaction_id == "EX_glc__D_e":
+                if reaction_id == "EX_glc__D_e":     #it will be always none if the class was Step instead of Proccess. why?
                     if self.initial_upper_bound is None:  # If the initial upper bound has not been stored yet
                         self.initial_upper_bound = old_bounds[1]  # Store the initial upper bound
                     new_upper_bound = min(self.initial_upper_bound, current_v0)
                     new_bounds = (old_bounds[0], new_upper_bound)  # keep the old lower bound
-                    print("new_bounds=", new_bounds)
                     updated_bounds[reaction_id] = new_bounds
         return {
             "reaction_bounds": updated_bounds,
