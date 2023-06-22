@@ -215,16 +215,13 @@ class DynamicFBA(Process):
     def next_update(self, timestep, state):
         reaction_bounds = state["reaction_bounds"]
         for reaction_id, (lower_bound, upper_bound) in reaction_bounds.items():
-            #print(reaction_id, (lower_bound, upper_bound))
             reaction = self.model.reactions.get_by_id(reaction_id)
             reaction.lower_bound, reaction.upper_bound = lower_bound, upper_bound
-        #print("XXXXXXXXXXXXXXXXX")
-
+            
         solution = self.model.optimize()
         objective_value = solution.objective_value
         fluxes = solution.fluxes.to_dict()
-        print(fluxes)
-        print("XXXXXXXXXXXXXXXXX")
+
         return {
             "fluxes": fluxes,
             "objective_flux": objective_value
@@ -244,6 +241,7 @@ BiomassCalculator takes in the initial objective flux and estimates the current 
     def __init__(self, parameters=None):
         super().__init__(parameters=parameters)
         self.current_biomass = self.parameters['initial_objective_flux']
+
 
     def compute_biomass(self, objective_flux, time_proportion):
         self.current_biomass += objective_flux * time_proportion * self.current_biomass
