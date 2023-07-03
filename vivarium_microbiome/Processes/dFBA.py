@@ -217,7 +217,7 @@ class DynamicFBA(Process):
         for reaction_id, (lower_bound, upper_bound) in reaction_bounds.items():
             reaction = self.model.reactions.get_by_id(reaction_id)
             reaction.lower_bound, reaction.upper_bound = lower_bound, upper_bound
-            
+
         solution = self.model.optimize()
         objective_value = solution.objective_value
         fluxes = solution.fluxes.to_dict()
@@ -322,7 +322,7 @@ class EnvCalculator(Process):
 
 
 
-def main(model_path, simulation_time, env_parameters, init_concentration, initial_state=None):
+def main(config):
     """
     This function runs the simulation for a specified duration.
 
@@ -330,25 +330,18 @@ def main(model_path, simulation_time, env_parameters, init_concentration, initia
     RegulatoryProtein, GeneExpression and ProteinExpression processes,
     establishes the topology between these processes, and executes the simulation for the specified timeframe.
     """
-    initial_state = initial_state or {}
-    parameters = {
-        "model_file": model_path,
-        "km": env_parameters['km'],
-        "init_concentration": init_concentration
-    }
-    reaction_bounds = ReactionBounds(parameters)
-    parameters['reaction_bounds'] = reaction_bounds
-    dynamic_fba = DynamicFBA(parameters)
+    initial_state = config['main']['initial_state']
+    simulation_time = config['main']['simulation_time']
+    reaction_bounds = ReactionBounds(config['ReactionBounds'])
+    dynamic_fba = DynamicFBA(config['DynamicFBA'])
     initial_state = {"reaction_bounds": reaction_bounds.bounds}
     initial_objective_flux_update = dynamic_fba.next_update(1, initial_state)
     initial_objective_flux = initial_objective_flux_update["objective_flux"]
-    parameters["initial_objective_flux"] = initial_objective_flux
-    biomass_calculator = BiomassCalculator(parameters)
-    env_parameters['init_concentration'] = init_concentration
-    env_calculator = EnvCalculator(env_parameters)
-    regulatory_protein = RegulatoryProtein()
-    gene_expression = GeneExpression()
-    protein_expression = ProteinExpression()
+    biomass_calculator = BiomassCalculator({'initial_objective_flux': initial_objective_flux})
+    env_calculator = EnvCalculator(config['EnvCalculator'])
+    regulatory_protein = RegulatoryProtein(config['RegulatoryProtein'])
+    gene_expression = GeneExpression(config['GeneExpression'])
+    protein_expression = ProteinExpression(config['ProteinExpression'])
 
     processes = {
         'ReactionBounds': reaction_bounds,
