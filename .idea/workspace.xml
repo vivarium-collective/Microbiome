@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9820cd3d-398b-473c-839d-88c6cbae95bc" name="Changes" comment="" />
+    <list default="true" id="9820cd3d-398b-473c-839d-88c6cbae95bc" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Notebook/dFBA.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Notebook/dFBA.ipynb" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
