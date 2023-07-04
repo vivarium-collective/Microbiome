@@ -1,5 +1,4 @@
 from vivarium.core.process import Process
-from cobra.io import read_sbml_model
 TIME_PROPORTION = (1 / 60)
 class BiomassCalculator(Process):
     """

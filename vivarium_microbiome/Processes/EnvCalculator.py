@@ -1,4 +1,3 @@
-
 from vivarium.core.process import Process
 TIME_PROPORTION = (1 / 60)
 class EnvCalculator(Process):

@@ -5,10 +5,8 @@ from ReactionBounds import ReactionBounds
 from DynamicFBA import DynamicFBA
 from BiomassCalculator import BiomassCalculator
 from EnvCalculator import EnvCalculator
-from vivarium.core.process import Process, Step
 from vivarium.core.engine import Engine, pf
-from cobra.io import read_sbml_model
-import random
+
 
 
 TIME_PROPORTION = (1 / 60)  # we set each time-step as an hour and the Time_proportion as a minute
