@@ -1,17 +1,24 @@
-
-
 # Microbiome Multiscale Modeling Project
 
-<!--
-TODO: Microbiome Multiscale Modeling
--->
+The Microbiome Multiscale Modeling Project is a research-focused endeavor aimed at building a multiscale understanding
+of microbiome through the development and refinement of metabolic analysis techniques. Our focus is on a 
+system-level understanding, using computational models to shed light on the complex processes that define the 
+interactions within microbial communities. The project employs the [Vivarium](https://vivarium-collective.github.io) 
+framework, a tool designed to support the construction and simulation of complex biological systems model.
 
-The aim of this project is to develop a multiscale model of the microbiome. To achieve this, we initiated the project by implementing flux balance analysis (FBA) for E. coli as the first step. Subsequently, we advanced to dynamic flux balance analysis (dFBA), which allows for modeling the flux at each time-step. Below, you can find the link to the Jupyter Notebook corresponding to each step of our project.
+## Project Outline:
 
-Notebooks: 
+### Flux Balance Analysis (FBA)
 
-[FBA](https://github.com/vivarium-collective/Microbiome/blob/master/Notebook/FBA.ipynb)
+We began the project with the implementation of Flux Balance Analysis (FBA) for Escherichia coli, a well-studied model 
+organism. FBA is a mathematical procedure used for simulating the metabolism of biological organisms.
 
-[dFBA](https://github.com/vivarium-collective/Microbiome/blob/master/Notebook/dFBA.ipynb) 
+[Jupyter Notebook for FBA](https://github.com/vivarium-collective/Microbiome/blob/master/Notebook/FBA.ipynb)
 
+### Dynamic Flux Balance Analysis (dFBA)
 
+Building on our initial implementation, we implemented to Dynamic Flux Balance Analysis (dFBA). dFBA is a time-resolved 
+extension of FBA, capable of modeling the flux at each time-step. This advancement enables us to capture and analyze 
+the time-dependent behavior of the E. coli's metabolism within the simulated environment.
+
+[Jupyter Notebook for dFBA](https://github.com/vivarium-collective/Microbiome/blob/master/Notebook/dFBA.ipynb)

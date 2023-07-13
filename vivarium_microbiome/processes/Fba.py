@@ -56,3 +56,7 @@ def main(model_path):
     data = sim.emitter.get_data()
     output = pf(data)
     return output, processes1, topology1
+
+def test_fba():
+    model_path = "../SBML/e_coli_core.xml"
+    main(model_path)
