@@ -5,7 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9820cd3d-398b-473c-839d-88c6cbae95bc" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Notebook/dFBA.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Notebook/dFBA.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Microbiome.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Microbiome.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vivarium_microbiome/Processes/BiomassCalculator.py" beforeDir="false" afterPath="$PROJECT_DIR$/vivarium_microbiome/processes/BiomassCalculator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vivarium_microbiome/Processes/DynamicFBA.py" beforeDir="false" afterPath="$PROJECT_DIR$/vivarium_microbiome/processes/DynamicFBA.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vivarium_microbiome/Processes/EnvCalculator.py" beforeDir="false" afterPath="$PROJECT_DIR$/vivarium_microbiome/processes/EnvCalculator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vivarium_microbiome/Processes/Fba.py" beforeDir="false" afterPath="$PROJECT_DIR$/vivarium_microbiome/processes/Fba.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vivarium_microbiome/Processes/GeneExpression.py" beforeDir="false" afterPath="$PROJECT_DIR$/vivarium_microbiome/processes/GeneExpression.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vivarium_microbiome/Processes/ProteinExpression.py" beforeDir="false" afterPath="$PROJECT_DIR$/vivarium_microbiome/processes/ProteinExpression.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vivarium_microbiome/Processes/ReactionBounds.py" beforeDir="false" afterPath="$PROJECT_DIR$/vivarium_microbiome/processes/ReactionBounds.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vivarium_microbiome/Processes/RegulatoryProtein.py" beforeDir="false" afterPath="$PROJECT_DIR$/vivarium_microbiome/processes/RegulatoryProtein.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vivarium_microbiome/Processes/dFBA.py" beforeDir="false" afterPath="$PROJECT_DIR$/vivarium_microbiome/processes/dFBA.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vivarium_microbiome/Processes/dFBA_modular.py" beforeDir="false" afterPath="$PROJECT_DIR$/vivarium_microbiome/processes/dFBA_modular.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,6 +79,17 @@
       <updated>1682430782998</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -7,16 +7,13 @@ with open("README.md", 'r') as readme:
     long_description = readme.read()
 
 setup(
-    name='',  # TODO: Put your package name here.
+    name='vivarium-microbiome',  # TODO: Put your package name here.
     version='0.0.1',
     packages=[
-        # TODO: Replace 'template' with the name of your folder.
-        'template',
-        'template.processes',
-        'template.composites',
-        'template.experiments',
+        'vivarium_microbiome',
+        'vivarium_microbiome.processes',
     ],
-    author='',  # TODO: Put your name here.
+    author='Amin Boroomand',
     author_email='',  # TODO: Put your email here.
     url='',  # TODO: Put your project URL here.
     license='',  # TODO: Choose a license.
