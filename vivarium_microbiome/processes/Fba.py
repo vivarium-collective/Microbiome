@@ -1,3 +1,8 @@
+"""
+FBA
+"""
+
+import os
 from vivarium.core.process import Process
 from vivarium.core.engine import Engine, pf
 import numpy as np
@@ -58,5 +63,6 @@ def main(model_path):
     return output, processes1, topology1
 
 def test_fba():
-    model_path = "../SBML/e_coli_core.xml"
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    model_path = os.path.join(current_dir, "../data/e_coli_core.xml")
     main(model_path)
