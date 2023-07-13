@@ -27,6 +27,7 @@ setup(
     install_requires=[
         'vivarium-core>=1.0.0',
         'pytest',
+        'cobra',
         # TODO: Add other dependencies.
     ],
 )
